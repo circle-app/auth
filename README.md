@@ -1,40 +1,6 @@
-# auth
+# auth [![Build Status](https://travis-ci.org/circle-app/auth.svg?branch=master)](https://travis-ci.org/circle-app/auth) [![](https://images.microbadger.com/badges/image/pando85/auth.svg)](https://microbadger.com/images/pando85/auth) [![](https://images.microbadger.com/badges/version/pando85/auth.svg)](https://microbadger.com/images/pando85/auth) [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/circle-app/auth/blob/master/LICENSE)
 
-This is a template for python projects.
-
-Exists a branch for aiohttp projects. You can use it replacing `master` by `aiohttp` in next steps.
-
-Set this repo as remote and merge to yours.
-And then, replace `auth` with your python package desired name.
-```bash
-git remote add template https://github.com/pando85/python-project-template.git
-git pull --all
-git merge template/master 
-APP_NAME={desired_name}
-mv auth $APP_NAME
-find ./ -type f -not -path "./.git/*" -exec sed -i "s/auth/$APP_NAME/g" {} \;
-```
-
-For travis magic you need [travis-cli](https://github.com/travis-ci/travis.rb).
-
-If you want to grant travis access to update your requirements you will need to replace `__GITHUB_TOKEN__` with next command:
-
-```bash
-# Get token from Github with public repo access
-GITHUB_TOKEN={token}
-SECURE_SECRET=$(travis encrypt GITHUB_TOKEN=$GITHUB_TOKEN)
-sed -i "s/__GITHUB_TOKEN__/$SECURE_SECRET/g" .travis.yml
-```
-
-To get dockerhub build working when merge something into master you will need to replace `__DOCKERHUB_TOKEN__` with next command:
-
-
-```bash
-# Get token from dockerhub repo-> Build Settings -> Build triggers -> Trigger token
-DOCKERHUB_TOKEN_TRIGGER={token}
-SECURE_SECRET=$(travis encrypt DOCKERHUB_TOKEN=$DOCKERHUB_TOKEN_TRIGGER)
-sed -i "s/__DOCKERHUB_TOKEN__/$SECURE_SECRET/g" .travis.yml
-```
+Auth microservice for circle.
 
 ## Lint
 
