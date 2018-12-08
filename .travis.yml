@@ -31,6 +31,10 @@ jobs:
       install:
         - pip install -r requirements_test.txt
         - bash scripts/update_dependencies.sh
+      before_script:
+        # Disable services enabled by default
+        - sudo service rabbitmq-server stop
+        - sudo service postgresql stop
       script:
         - bash scripts/update_dependencies.sh
       after_success:
