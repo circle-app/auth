@@ -21,12 +21,20 @@ jobs:
     - stage: "unit tests"
       install:
         - pip install -r requirements_test.txt
+      before_script:
+        # Disable services enabled by default
+        - sudo service rabbitmq-server stop
+        - sudo service postgresql stop
       script:
         - make test
     - stage: "update-dependencies"
       install:
         - pip install -r requirements_test.txt
         - bash scripts/update_dependencies.sh
+      before_script:
+        # Disable services enabled by default
+        - sudo service rabbitmq-server stop
+        - sudo service postgresql stop
       script:
         - bash scripts/update_dependencies.sh
       after_success:
