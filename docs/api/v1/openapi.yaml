@@ -1,0 +1,198 @@
+openapi: "3.0.0"
+info:
+  description: "Microservice oriented to authenticate users. It is based on JWT tokens."
+  version: "1.0.0"
+  title: "Auth"
+  contact:
+    email: "pando855@gmail.com"
+  license:
+    name: "GPL-3.0"
+    url: "https://www.gnu.org/licenses/gpl-3.0.en.html"
+servers:
+  - url: "http://localhost:8080"
+tags:
+- name: auth
+  description: "Get a JWT token."
+- name: password
+  description: "Change password"
+- name: user
+  description: "Operations about user"
+paths:
+  /auth:
+    post:
+      tags:
+      - auth
+      summary: "Get a JWT token for user"
+      description: ""
+      operationId: "auth"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  token:
+                    type: "string"
+        422:
+          description: "Invalid credentials"
+  /user:
+    post:
+      security:
+      - bearerAuth: []
+      tags:
+        - user
+      summary: Create user
+      description: ""
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  '/user/{username}':
+    get:
+      security:
+      - bearerAuth: []
+      tags:
+        - user
+      summary: Get user by user name
+      description: ''
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: 'The name that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            example: admin
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+    put:
+      security:
+      - bearerAuth: []
+      tags:
+        - user
+      summary: Updated user
+      description: ''
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+      responses:
+        '204':
+          description: "successful operation"
+        '400':
+          description: Invalid user supplied
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+    delete:
+      security:
+      - bearerAuth: []
+      tags:
+        - user
+      summary: Delete user
+      description: ''
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: "successful operation"
+        '400':
+          description: Invalid username supplied
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+
+  /password:
+    post:
+      security:
+      - bearerAuth: []
+      tags:
+      - "password"
+      summary: "Update password"
+      description: ""
+      operationId: "updatePassword"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created user object"
+        required: true
+        schema:
+          $ref: "#/components/schemas/User"
+      responses:
+        '204':
+          description: "successful operation"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+components:
+  schemas:
+    User:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          example: admin
+        password:
+          type: "string"
+          example: admin
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+# 2) Apply the security globally to all operations
+#security:
+#  - bearerAuth: []
