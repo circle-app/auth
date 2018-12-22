@@ -45,7 +45,11 @@ paths:
   /user:
     post:
       security:
+<<<<<<< HEAD
       - jwt: []
+=======
+      - bearerAuth: []
+>>>>>>> origin/master
       tags:
         - user
       summary: Create user
@@ -70,7 +74,11 @@ paths:
   '/user/{username}':
     get:
       security:
+<<<<<<< HEAD
       - jwt: []
+=======
+      - bearerAuth: []
+>>>>>>> origin/master
       tags:
         - user
       summary: Get user by user name
@@ -99,7 +107,11 @@ paths:
           description: User not found
     put:
       security:
+<<<<<<< HEAD
       - jwt: []
+=======
+      - bearerAuth: []
+>>>>>>> origin/master
       tags:
         - user
       summary: Updated user
@@ -130,7 +142,11 @@ paths:
           description: User not found
     delete:
       security:
+<<<<<<< HEAD
       - jwt: []
+=======
+      - bearerAuth: []
+>>>>>>> origin/master
       tags:
         - user
       summary: Delete user
@@ -156,7 +172,11 @@ paths:
   /password:
     post:
       security:
+<<<<<<< HEAD
       - jwt: []
+=======
+      - bearerAuth: []
+>>>>>>> origin/master
       tags:
       - "password"
       summary: "Update password"
@@ -186,6 +206,7 @@ components:
           type: "string"
           example: admin
   securitySchemes:
+<<<<<<< HEAD
     jwt:
       type: http
       scheme: bearer
@@ -194,3 +215,15 @@ components:
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
+=======
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+# 2) Apply the security globally to all operations
+#security:
+#  - bearerAuth: []
+>>>>>>> origin/master
