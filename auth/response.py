@@ -1,11 +1,30 @@
-from aiohttp.web import Response
-from typing import Optional
+from aiohttp.web import Response, json_response
+
+from aiolambda.errors import ObjectAlreadyExists, ObjectNotFound
+from aiolambda.typing import Maybe
 
 
-def return_response(_json: Optional[str]) -> Response:
-    msg = _json
-    status_code = 200
-    if not _json:
-        msg = '{"error": "Not quote found"}'
-        status_code = 500
-    return Response(body=msg, content_type='application/json', status=status_code)
+def return_error(error: Exception) -> Response:
+    if isinstance(error, ObjectNotFound):
+        return json_response('Invalid credentials', status=422)
+    if isinstance(error, ObjectAlreadyExists):
+        return json_response('User already exists', status=409)
+    return json_response('Unknow error', status=500)
+
+
+def return_200(maybe_json: Maybe[dict]) -> Response:
+    if isinstance(maybe_json, Exception):
+        return return_error(maybe_json)
+    return json_response(maybe_json, status=200)
+
+
+def return_201(maybe_json: Maybe[dict]) -> Response:
+    if isinstance(maybe_json, Exception):
+        return return_error(maybe_json)
+    return json_response(maybe_json, status=201)
+
+
+def return_204(maybe_json: Maybe[dict]) -> Response:
+    if isinstance(maybe_json, Exception):
+        return return_error(maybe_json)
+    return json_response('', status=204)

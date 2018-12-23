@@ -17,6 +17,8 @@ tags:
   description: "Change password"
 - name: user
   description: "Operations about user"
+- name: ping
+  description: "Test service"
 paths:
   /auth:
     post:
@@ -24,7 +26,7 @@ paths:
       - auth
       summary: "Get a JWT token for user"
       description: ""
-      operationId: "auth"
+      operationId: "auth.handlers.auth_handler"
       requestBody:
         content:
           application/json:
@@ -50,7 +52,7 @@ paths:
         - user
       summary: Create user
       description: ""
-      operationId: createUser
+      operationId: "auth.handlers.create_user_handler"
       requestBody:
         description: Created user object
         required: true
@@ -67,6 +69,8 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/UserAlreadyExists'
   '/user/{username}':
     get:
       security:
@@ -174,6 +178,16 @@ paths:
           description: "successful operation"
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+  /ping:
+    get:
+      tags:
+      - ping
+      summary: "Test service"
+      description: ""
+      operationId: "auth.handlers.ping_handler"
+      responses:
+        '200':
+          description: successful operation
 components:
   schemas:
     User:
@@ -194,3 +208,5 @@ components:
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
+    UserAlreadyExists:
+      description: User already exists

@@ -1,31 +1,34 @@
-from aiohttp.web import Request, Response, json_response
+from aiohttp.web import Response
+from aiolambda import logger
+from aiolambda.functools import compose
 
-from auth import logger
 from auth.db import create_user
-from auth.functools import compose
+from auth.response import return_200, return_201
 from auth.token import create_token
-from auth.typing import Maybe, Error, Success
+from auth.user import to_dict
 from auth.verify import check_password
 
 
-async def auth_handler(request: Request) -> Response:
+async def auth_handler(*_null, **request) -> Response:
     return await compose(
         check_password,
         logger.debug,
         create_token,
         logger.debug,
-        return_response
+        return_201
     )(request)
 
 
-async def create_user_handler(request: Request) -> Response:
+async def create_user_handler(*_null, **request) -> Response:
     return await compose(
         create_user,
-        return_response
+        logger.debug,
+        to_dict,
+        return_201
     )(request)
 
 
-def return_response(r: Maybe[Success]) -> Response:
-    if isinstance(r, Error):
-        return json_response(r.msg, status=r.status_code)
-    return json_response(r.json, status=r.status_code)
+async def ping_handler() -> Response:
+    return compose(
+        logger.debug,
+        return_200)('pong')

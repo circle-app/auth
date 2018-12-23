@@ -1,9 +1,10 @@
-import aiohttp.web
+from aiolambda import logger
+from aiolambda.app import get_app
 
-from auth.app import get_app
-from auth.logger import access_logger
+from auth.db import init_db
+from auth.mq import init_mq
 
 
 def main():
-    app = get_app()
-    aiohttp.web.run_app(app, access_log=access_logger)
+    app = get_app(init_db=init_db, init_mq=init_mq)
+    app.run(port=8080, access_log=logger.access_logger)

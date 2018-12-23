@@ -1,6 +1,8 @@
-aiohttp==3.4.4
-asyncpg==0.18.2
-cchardet==2.1.4
-passlib==1.7.1
-uvloop==0.11.3
+aiohttp>=2.2.5
+aiohttp-swagger>=1.0.5
+aiohttp_jinja2==0.15.0
+aiolambda==0.2.9
 aio-pika==4.8.0
+ujson>=1.35
+python-jose[cryptography]==3.0.1
+connexion[swagger-ui]

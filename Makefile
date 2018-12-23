@@ -2,7 +2,7 @@
 
 APP := auth
 WORKON_HOME ?= .venv
-VENV_BASE := $(WORKON_HOME)/$(APP)
+VENV_BASE := $(WORKON_HOME)/${APP}
 VENV_ACTIVATE := $(VENV_BASE)/bin/activate
 PYTHON := ${VENV_BASE}/bin/python3
 
@@ -28,7 +28,7 @@ requirements_test: requirements
 lint:	## run pycodestyle
 lint: requirements_test
 	@echo Running linter
-	@${PYTHON} -m pycodestyle ${APP} test
+	@${PYTHON} -m pycodestyle .
 	@${PYTHON} -m flake8 ${APP} test
 	@${PYTHON} -m mypy --ignore-missing-imports ${APP} test
 
@@ -55,7 +55,6 @@ init_db: destroy_db
 	 	echo 'Waiting for postgres...'; \
 	 	sleep 1; \
 	done;
-
 destroy_mq:    ## destroy docker mq
 	@echo Destroy rabbit
 	@docker rm -f rabbit > /dev/null || echo Not postgres running
