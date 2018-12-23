@@ -3,9 +3,13 @@ from aiohttp.web import Response, json_response
 from aiolambda.errors import ObjectAlreadyExists, ObjectNotFound
 from aiolambda.typing import Maybe
 
+from auth.errors import InvalidCredentials
+
 
 def return_error(error: Exception) -> Response:
     if isinstance(error, ObjectNotFound):
+        return json_response('Invalid credentials', status=422)
+    if isinstance(error, InvalidCredentials):
         return json_response('Invalid credentials', status=422)
     if isinstance(error, ObjectAlreadyExists):
         return json_response('User already exists', status=409)

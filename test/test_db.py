@@ -1,11 +1,10 @@
 import asyncpg
-import passlib
 import pytest
 
-from auth.config import POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
-from auth.db import USERS_TABLE_NAME, init_db, _create_user, _get_user
-from auth.typing import Error
-from auth.user import User
+from aiolambda.config import (POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER,
+                              POSTGRES_PASSWORD)
+
+from auth.db import init_db
 
 
 @pytest.fixture
@@ -24,24 +23,3 @@ async def pool(loop):
 async def count_rows(conn: asyncpg.connect, table: str):
     r = await conn.fetchrow(f'SELECT COUNT(*) FROM {table}')
     return r['count']
-
-
-async def test_create_user(pool: asyncpg.pool.Pool):
-    test_user = User('test', 'test1234')
-    async with pool.acquire() as connection:
-        rows_len = await count_rows(connection, USERS_TABLE_NAME)
-        await _create_user(connection, test_user)
-        rows_len_after = await count_rows(connection, USERS_TABLE_NAME)
-    assert (rows_len_after - rows_len) == 1
-
-
-async def test_get_user(pool: asyncpg.pool.Pool):
-    test_user = User('admin', 'admin')
-    async with pool.acquire() as connection:
-        user = await _get_user(connection, test_user.username)
-    if isinstance(user, Error):
-        assert "User does not exists" == "Avoid mypy complain about types"
-        return
-    assert test_user.username == user.username
-    is_verified = passlib.hash.pbkdf2_sha256.verify(test_user.password, user.password)
-    assert is_verified is True

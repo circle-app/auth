@@ -1,41 +1,63 @@
 import pytest
 
-from auth.app import get_app
+from aiolambda.app import get_app
+
+from auth.db import init_db
+
+BASE_URL = "/v1"
 
 
 @pytest.fixture
 def cli(loop, aiohttp_client):
-    app = get_app()
-    return loop.run_until_complete(aiohttp_client(app))
+    app = get_app(init_db)
+    return loop.run_until_complete(aiohttp_client(app.app))
+
+
+async def get_token(cli) -> str:
+    auth_resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'admin', 'password': 'admin'})
+    token = str(await auth_resp.json())
+    return token
 
 
 async def test_auth(cli):
-    resp = await cli.post('/auth', json={'username': 'admin', 'password': 'admin'})
-    assert resp.status == 200
-    assert await resp.json() == {'token': 'TODO'}
+    resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'admin', 'password': 'admin'})
+    assert resp.status == 201
+    token_start = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJhaW9sYW1iZGEiLC'
+    token = str(await resp.json())
+    assert token.startswith(f'{token_start}')
 
 
 async def test_auth_incorret_user(cli):
-    resp = await cli.post('/auth', json={'username': 'foo', 'password': 'foo'})
+    resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'foo', 'password': 'foo'})
     assert resp.status == 422
-    assert await resp.json() == "'user does not exists'"
+    assert await resp.json() == 'Invalid credentials'
 
 
 async def test_auth_incorret_password(cli):
-    resp = await cli.post('/auth', json={'username': 'admin', 'password': 'foo'})
+    resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'admin', 'password': 'foo'})
     assert resp.status == 422
-    assert await resp.json() == "'password does not match'"
+    assert await resp.json() == 'Invalid credentials'
 
 
 async def test_user_add(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
     user = {'username': 'test2', 'password': 'test1234'}
-    resp = await cli.post('/user', json=user)
+    resp = await cli.post(f'{BASE_URL}/user', json=user, headers=auth_header)
     assert resp.status == 201
     assert await resp.json() == user
 
 
 async def test_user_add_exist_user(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
     user = {'username': 'admin', 'password': 'test1234'}
-    resp = await cli.post('/user', json=user)
+    resp = await cli.post(f'{BASE_URL}/user', json=user, headers=auth_header)
+    assert resp.status == 409
+    assert await resp.json() == 'User already exists'
+
+
+async def test_ping(cli):
+    resp = await cli.get(f'{BASE_URL}/ping')
     assert resp.status == 200
-    assert await resp.json() == user
+    assert await resp.json() == 'pong'

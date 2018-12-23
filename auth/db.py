@@ -1,11 +1,13 @@
-import aiohttp
 import asyncpg
 import passlib.hash
 
+from aiohttp.web import Request
 from aiolambda import logger
 from aiolambda.db import _check_table_exists
 from aiolambda.errors import ObjectAlreadyExists, ObjectNotFound
 from aiolambda.functools import Maybe
+from toolz import curry
+from typing import Callable
 
 from auth.config import ADMIN_USER, ADMIN_PASSWORD
 from auth.user import User
@@ -21,22 +23,6 @@ async def _create_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
     except asyncpg.exceptions.UniqueViolationError:
         return ObjectAlreadyExists()
     return user
-
-
-async def _update_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
-    await conn.execute(f'''
-        UPDATE {USERS_TABLE_NAME} SET password = $2 WHERE username = $1
-    ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password))
-    return user
-
-
-async def _get_user(conn: asyncpg.connection, username: str) -> Maybe[User]:
-    row = await conn.fetchrow(
-        f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', username)
-
-    if not row:
-        return ObjectNotFound()
-    return User(**dict(row))
 
 
 async def init_db(conn: asyncpg.connect) -> None:
@@ -56,22 +42,34 @@ async def init_db(conn: asyncpg.connect) -> None:
     await _create_user(conn, User(ADMIN_USER, ADMIN_PASSWORD))
 
 
-async def create_user(request: aiohttp.web.Request) -> Maybe[User]:
+@curry
+async def _operate_user(operation: Callable, request: Request) -> Maybe[User]:
     pool = request.app['pool']
     user_request = User(**(await request.json()))
 
     async with pool.acquire() as connection:
-        maybe_user = await _create_user(connection, user_request)
-        if isinstance(maybe_user, User):
-            return maybe_user
-        maybe_user = await _update_user(connection, user_request)
+        maybe_user = await operation(connection, user_request)
     return maybe_user
 
 
-async def get_user(request: aiohttp.web.Request) -> Maybe[User]:
-    pool = request.app['pool']
-    user_request = User(**(await request.json()))
+@_operate_user
+async def create_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
+    return await _create_user(conn, user)
 
-    async with pool.acquire() as connection:
-        user = await _get_user(connection, user_request.username)
+
+@_operate_user
+async def update_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
+    await conn.execute(f'''
+        UPDATE {USERS_TABLE_NAME} SET password = $2 WHERE username = $1
+    ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password))
     return user
+
+
+@_operate_user
+async def get_user(conn: asyncpg.connection, user: User) -> Maybe[User]:
+    row = await conn.fetchrow(
+        f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', user.username)
+
+    if not row:
+        return ObjectNotFound()
+    return User(**dict(row))
