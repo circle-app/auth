@@ -1,8 +1,14 @@
 ---
+sudo: true
 
+dist: xenial
 language: python
 python:
-  - '3.6'
+  - '3.7'
+
+cache: pip
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
 
 # Only execute travis in master or PR to master
 branches:
@@ -20,28 +26,14 @@ jobs:
   include:
     - stage: "unit tests"
       install:
-        - pip install -r requirements_test.txt
-      before_script:
-        # Disable services enabled by default
-        - sudo service rabbitmq-server stop
-        - sudo service postgresql stop
+        - make requirements_test
       script:
         - make test
     - stage: "update-dependencies"
       install:
-        - pip install -r requirements_test.txt
-      before_script:
-        # Disable services enabled by default
-        - sudo service rabbitmq-server stop
-        - sudo service postgresql stop
+        - make requirements_test
       script:
-        - bash scripts/update_dependencies.sh
-      after_success:
-        - git config user.name "tracis-ci"
-        - git config user.email "travis-ci@travis-ci.org"
-        - git add requirements.txt
-        - git commit -m 'Update requirements.txt'
-        - git push "https://$GITHUB_TOKEN@github.com/$TRAVIS_REPO_SLUG" HEAD:$TRAVIS_BRANCH
+        - bash .ci/update_dependencies.sh
       env:
         - secure: "m13MeeS/hlBE/k2u1U/mCebacyqwgV42pbAw1Zb336N9s7W4/kZwF6/V3ZtnFcmSqyUV9rrhnBtE2VYJj1gd6kXlM7DAtPBLWkH5elmwWkTA9dxCD+Uv+S4A9KMpsM78pZM9rtOZwWWPupzzJ9pjNa8XoCbYCOd+F7C2J6wddbYN1knObPd+W4WRw/hCOBklh6eWTuNoeh5wrKH00peD3kceWhb0niIpeB5k7MTfnZkeOVX0scmPrVuQeUHQCKV3vx62RpKTdi+hF+AAxTSD9MUDl2GNlYh+CpxAQsNpzkVoZki22vXLcpkiciTSuOND2zE2d7SVyz+PMw1MzVF6F/KMipnpaQWBLTa5tTU2ohX2MxP+Ut7fXxBh/CwuecuDxTaQ+HKxbqGRWgpETsX3RJXLzkW38lr4qxb8VITzl9DVDL9IJnvr3QPv5KRHv3IKEZjocjYEwXuDv+03b4poGyWY1/cQLq94RKM8BdArejJGqIFxcJxAL1HG1kzK5bwsgTQsGRo5tSFJ8NEIARrPQ9SMxFMoJh+HCIaQb9y1A/w2eLYtZT5YbHhgD1zs8lzopxJnDy/wcXGqogaxKXARmneUOfd+uc75rM0cGciHyovM7xbPpKwjX+ba2YDa8R8iZV8vhepObxdpRnpogoPqP3x9WXVwKe6m6sPepFuNCLw="
     - stage: dockerhub-build
