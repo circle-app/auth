@@ -31,12 +31,12 @@ update_requirements(){
 
 echo Update packages
 update_packages
-
-echo Run unit tests
-make test
-
-if update_requirements requirements.txt; then
+update_requirements requirements.txt
+if ! git diff --exit-code -- requirements.txt; then
     echo "Updated requirements"
+    echo Run unit tests
+    make test
+
     if [ ! -z "${TRAVIS_REPO_SLUG}" ]; then
         git config user.name "tracis-ci"
         git config user.email "travis-ci@travis-ci.org"
