@@ -2,9 +2,9 @@
 set -e
 
 if [ -z "${WORKON_HOME}" ]; then
-    PIP=.venv/aiolambda/bin/pip
+    PIP=.venv/auth/bin/pip
 else
-    PIP=$WORKON_HOME/aiolambda/bin/pip
+    PIP=$WORKON_HOME/auth/bin/pip
 fi
 
 update_packages(){
