@@ -42,7 +42,7 @@ async def test_auth_incorret_password(cli):
 async def test_user_add(cli):
     token = await get_token(cli)
     auth_header = {'Authorization': f'Bearer {token}'}
-    user = {'username': 'test2', 'password': 'test1234'}
+    user = {'username': 'test2', 'password': 'test1234', 'scope': 'user'}
     resp = await cli.post(f'{BASE_URL}/user', json=user, headers=auth_header)
     assert resp.status == 201
     assert await resp.json() == user

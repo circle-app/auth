@@ -47,7 +47,7 @@ paths:
   /user:
     post:
       security:
-      - jwt: []
+      - jwt: [admin]
       tags:
         - user
       summary: Create user
@@ -74,7 +74,7 @@ paths:
 #  '/user/{username}':
 #    get:
 #      security:
-#      - jwt: []
+#      - jwt: [admin]
 #      tags:
 #        - user
 #      summary: Get user by user name
@@ -103,7 +103,7 @@ paths:
 #          description: User not found
 #    put:
 #      security:
-#      - jwt: []
+#      - jwt: [admin]
 #      tags:
 #        - user
 #      summary: Updated user
@@ -134,7 +134,7 @@ paths:
 #          description: User not found
 #    delete:
 #      security:
-#      - jwt: []
+#      - jwt: [admin]
 #      tags:
 #        - user
 #      summary: Delete user
@@ -160,7 +160,9 @@ paths:
 #  /password:
 #    post:
 #      security:
-#      - jwt: []
+#      - jwt:
+#         - user
+#         - admin
 #      tags:
 #      - "password"
 #      summary: "Update password"
