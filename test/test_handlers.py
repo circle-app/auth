@@ -57,6 +57,16 @@ async def test_user_add_exist_user(cli):
     assert await resp.json() == 'User already exists'
 
 
+async def test_user_add_permission_deny(cli):
+    auth_resp = await cli.post(f'{BASE_URL}/auth',
+                               json={'username': 'test2', 'password': 'test1234'})
+    token = str(await auth_resp.json())
+    auth_header = {'Authorization': f'Bearer {token}'}
+    resp = await cli.post(f'{BASE_URL}/user',
+                          headers=auth_header)
+    assert resp.status == 403
+
+
 async def test_ping(cli):
     resp = await cli.get(f'{BASE_URL}/ping')
     assert resp.status == 200
