@@ -67,6 +67,14 @@ async def test_user_add_permission_deny(cli):
     assert resp.status == 403
 
 
+async def test_user_add_body_validation(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
+    user = {'username': 'boo'}
+    resp = await cli.post(f'{BASE_URL}/user', json=user, headers=auth_header)
+    assert resp.status == 400
+
+
 async def test_ping(cli):
     resp = await cli.get(f'{BASE_URL}/ping')
     assert resp.status == 200
