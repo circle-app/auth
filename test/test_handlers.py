@@ -29,8 +29,8 @@ async def test_auth(cli):
 
 async def test_auth_incorret_user(cli):
     resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'foo', 'password': 'foo'})
-    assert resp.status == 422
-    assert await resp.json() == 'Invalid credentials'
+    assert resp.status == 404
+    assert await resp.json() == 'Object not found'
 
 
 async def test_auth_incorret_password(cli):
@@ -100,7 +100,23 @@ async def test_update_user_fail_username_check(cli):
     user = {'username': 'admin', 'password': 'admin', 'scope': 'admin'}
     resp = await cli.put(f'{BASE_URL}/user/{user["username"]}2', json=user, headers=auth_header)
     assert resp.status == 422
-    assert await resp.json() == 'Id in body and url param does not coincide'
+    assert await resp.json() == 'Id in body and url params does not match'
+
+
+async def test_delete_user(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
+    username = 'test2'
+    resp = await cli.delete(f'{BASE_URL}/user/{username}', headers=auth_header)
+    assert resp.status == 204
+
+
+async def test_delete_user_not_exists(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
+    username = 'test22323'
+    resp = await cli.delete(f'{BASE_URL}/user/{username}', headers=auth_header)
+    assert resp.status == 404
 
 
 async def test_ping(cli):

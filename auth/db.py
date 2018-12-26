@@ -74,6 +74,16 @@ async def update_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
 
 
 @_operate_user
+async def delete_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
+    res = await conn.execute(f'''
+        DELETE FROM {USERS_TABLE_NAME} WHERE username = $1
+    ''', user.username)
+    if res == 'DELETE 0':
+        return ObjectNotFound()
+    return user
+
+
+@_operate_user
 async def get_user(conn: asyncpg.connection, user: User) -> Maybe[User]:
     row = await conn.fetchrow(
         f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', user.username)
