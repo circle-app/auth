@@ -1,4 +1,4 @@
-# auth [![Build Status](https://travis-ci.org/circle-app/auth.svg?branch=master)](https://travis-ci.org/circle-app/auth) [![](https://images.microbadger.com/badges/image/pando85/auth.svg)](https://microbadger.com/images/pando85/auth) [![](https://images.microbadger.com/badges/version/pando85/auth.svg)](https://microbadger.com/images/pando85/auth) [![License](https://img.shields.io/github/license/circle-app/auth.svg)](https://github.com/circle-app/auth/blob/master/LICENSE)
+# auth [![Build Status](https://travis-ci.org/circle-app/auth.svg?branch=master)](https://travis-ci.org/circle-app/auth) [![](https://images.microbadger.com/badges/image/pando85/auth.svg)](https://cloud.docker.com/repository/docker/pando85/auth) [![](https://images.microbadger.com/badges/version/pando85/auth.svg)](https://cloud.docker.com/repository/docker/pando85/auth) [![License](https://img.shields.io/github/license/circle-app/auth.svg)](https://github.com/circle-app/auth/blob/master/LICENSE)
 
 Auth microservice for circle.
 
