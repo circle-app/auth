@@ -69,6 +69,8 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/UserAlreadyExists'
   '/user/{username}':
@@ -99,6 +101,8 @@ paths:
           description: Invalid username supplied
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/ObjectNotFound'
     put:
@@ -130,6 +134,8 @@ paths:
           description: Invalid user supplied
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/ObjectNotFound'
     delete:
@@ -154,6 +160,8 @@ paths:
           description: Invalid username supplied
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/ObjectNotFound'
 
@@ -226,3 +234,5 @@ components:
       description: User already exists
     ObjectNotFound:
       description: User not found
+    Forbidden:
+      description: "403: Forbidden"

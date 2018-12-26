@@ -65,6 +65,7 @@ async def test_user_add_permission_deny(cli):
     resp = await cli.post(f'{BASE_URL}/user',
                           headers=auth_header)
     assert resp.status == 403
+    assert await resp.text() == '403: Forbidden'
 
 
 async def test_user_add_body_validation(cli):
