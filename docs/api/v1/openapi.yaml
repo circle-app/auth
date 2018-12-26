@@ -201,6 +201,12 @@ components:
         password:
           type: "string"
           example: admin
+        scope:
+          type: "string"
+          example: admin
+      required:
+        - username
+        - password
   securitySchemes:
     oauth2:
       type: oauth2
