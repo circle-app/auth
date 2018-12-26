@@ -3,6 +3,7 @@ from aiolambda import logger
 from aiolambda.functools import compose
 
 from auth.db import create_user, delete_user, get_user, update_user, update_password
+from auth.mq import send_create_user_message
 from auth.response import return_200, return_201, return_204
 from auth.token import generate_token
 from auth.user import to_dict
@@ -22,6 +23,7 @@ async def auth_handler(*_null, **extra_args) -> Response:
 async def create_user_handler(*_null, **extra_args) -> Response:
     return await compose(
         create_user,
+        send_create_user_message(extra_args['request']),
         to_dict,
         return_201
     )(extra_args['request'])

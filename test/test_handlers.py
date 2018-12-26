@@ -3,13 +3,15 @@ import pytest
 from aiolambda.app import get_app
 
 from auth.db import init_db
+from auth.mq import init_mq
+
 
 BASE_URL = "/v1"
 
 
 @pytest.fixture
 def cli(loop, aiohttp_client):
-    app = get_app(init_db)
+    app = get_app(init_db=init_db, init_mq=init_mq)
     return loop.run_until_complete(aiohttp_client(app.app))
 
 
