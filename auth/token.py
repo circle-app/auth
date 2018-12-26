@@ -17,6 +17,7 @@ def generate_token(user: User) -> Maybe[dict]:
         "iat": int(timestamp),
         "exp": int(timestamp + JWT_LIFETIME_SECONDS),
         "sub": str(user.username),
+        "scope": str(user.scope),
     }
     try:
         return jwt.encode(payload, JWT_PRIVATE_KEY, algorithm=JWT_ALGORITHM)

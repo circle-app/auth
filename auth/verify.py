@@ -18,4 +18,4 @@ async def check_password(request: Request) -> Maybe[User]:
     if not is_verified:
         return InvalidCredentials()
 
-    return user_request
+    return user_data

@@ -47,7 +47,7 @@ paths:
   /user:
     post:
       security:
-      - jwt: []
+      - oauth2: [admin]
       tags:
         - user
       summary: Create user
@@ -74,7 +74,7 @@ paths:
 #  '/user/{username}':
 #    get:
 #      security:
-#      - jwt: []
+#      - oauth2: [admin]
 #      tags:
 #        - user
 #      summary: Get user by user name
@@ -103,7 +103,7 @@ paths:
 #          description: User not found
 #    put:
 #      security:
-#      - jwt: []
+#      - oauth2: [admin]
 #      tags:
 #        - user
 #      summary: Updated user
@@ -134,7 +134,7 @@ paths:
 #          description: User not found
 #    delete:
 #      security:
-#      - jwt: []
+#      - oauth2: [admin]
 #      tags:
 #        - user
 #      summary: Delete user
@@ -160,7 +160,9 @@ paths:
 #  /password:
 #    post:
 #      security:
-#      - jwt: []
+#      - oauth2:
+#         - user
+#         - admin
 #      tags:
 #      - "password"
 #      summary: "Update password"
@@ -200,11 +202,15 @@ components:
           type: "string"
           example: admin
   securitySchemes:
-    jwt:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      x-bearerInfoFunc: aiolambda.security.decode_token
+    oauth2:
+      type: oauth2
+      x-tokenInfoFunc: aiolambda.security.decode_token
+      x-scopeValidateFunc: aiolambda.security.validate_scope
+      flows:
+        implicit:
+          scopes:
+            admin: Admin role
+            user: Application user
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid
