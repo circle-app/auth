@@ -100,7 +100,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
-          description: User not found
+          $ref: '#/components/responses/ObjectNotFound'
     put:
       security:
       - oauth2: [admin]
@@ -131,7 +131,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
-          description: User not found
+          $ref: '#/components/responses/ObjectNotFound'
     delete:
       security:
       - oauth2: [admin]
@@ -155,7 +155,7 @@ paths:
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '404':
-          description: User not found
+          $ref: '#/components/responses/ObjectNotFound'
 
 #  /password:
 #    post:
@@ -180,6 +180,8 @@ paths:
 #          description: "successful operation"
 #        '401':
 #          $ref: '#/components/responses/UnauthorizedError'
+#        '404':
+#          $ref: '#/components/responses/ObjectNotFound'
   /ping:
     get:
       tags:
@@ -222,3 +224,5 @@ components:
       description: Access token is missing or invalid
     UserAlreadyExists:
       description: User already exists
+    ObjectNotFound:
+      description: User not found
