@@ -5,3 +5,7 @@ class JWTEncodeError(Exception):
 
 class InvalidCredentials(Exception):
     pass
+
+
+class IdCheckError(Exception):
+    pass

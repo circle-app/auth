@@ -45,8 +45,10 @@ async def init_db(conn: asyncpg.connect) -> None:
 
 @curry
 async def _operate_user(operation: Callable,
-                        request: Request,
+                        request: Maybe[Request],
                         username: Optional[str] = None) -> Maybe[User]:
+    if isinstance(request, Exception):
+        return request
     pool = request.app['pool']
     if username:
         user_request = User(username=username, password='undefined')

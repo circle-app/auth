@@ -2,11 +2,11 @@ from aiohttp.web import Response
 from aiolambda import logger
 from aiolambda.functools import compose
 
-from auth.db import create_user, get_user
-from auth.response import return_200, return_201
+from auth.db import create_user, get_user, update_user
+from auth.response import return_200, return_201, return_204
 from auth.token import generate_token
 from auth.user import to_dict
-from auth.verify import check_password
+from auth.verify import check_password, verify_username
 
 
 async def auth_handler(*_null, **extra_args) -> Response:
@@ -37,10 +37,11 @@ async def get_user_handler(username, **extra_args) -> Response:
 
 async def update_user_handler(username, **extra_args) -> Response:
     return await compose(
-        get_user,
+        verify_username,
+        update_user,
         to_dict,
-        return_201
-    )(extra_args['request'])
+        return_204
+    )(extra_args['request'], username)
 
 
 async def delete_user_handler(username, **extra_args) -> Response:

@@ -86,6 +86,23 @@ async def test_get_user(cli):
     assert response_user['username'] == user['username']
 
 
+async def test_update_user(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
+    user = {'username': 'admin', 'password': 'admin', 'scope': 'admin'}
+    resp = await cli.put(f'{BASE_URL}/user/{user["username"]}', json=user, headers=auth_header)
+    assert resp.status == 204
+
+
+async def test_update_user_fail_username_check(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
+    user = {'username': 'admin', 'password': 'admin', 'scope': 'admin'}
+    resp = await cli.put(f'{BASE_URL}/user/{user["username"]}2', json=user, headers=auth_header)
+    assert resp.status == 422
+    assert await resp.json() == 'Id in body and url param does not coincide'
+
+
 async def test_ping(cli):
     resp = await cli.get(f'{BASE_URL}/ping')
     assert resp.status == 200

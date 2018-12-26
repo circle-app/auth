@@ -3,7 +3,7 @@ from aiohttp.web import Response, json_response
 from aiolambda.errors import ObjectAlreadyExists, ObjectNotFound
 from aiolambda.typing import Maybe
 
-from auth.errors import InvalidCredentials
+from auth.errors import InvalidCredentials, IdCheckError
 
 
 def return_error(error: Exception) -> Response:
@@ -11,6 +11,8 @@ def return_error(error: Exception) -> Response:
         return json_response('Invalid credentials', status=422)
     if isinstance(error, InvalidCredentials):
         return json_response('Invalid credentials', status=422)
+    if isinstance(error, IdCheckError):
+        return json_response('Id in body and url param does not coincide', status=422)
     if isinstance(error, ObjectAlreadyExists):
         return json_response('User already exists', status=409)
     return json_response('Unknow error', status=500)
@@ -31,4 +33,4 @@ def return_201(maybe_json: Maybe[dict]) -> Response:
 def return_204(maybe_json: Maybe[dict]) -> Response:
     if isinstance(maybe_json, Exception):
         return return_error(maybe_json)
-    return json_response('', status=204)
+    return json_response('successful operation', status=204)
