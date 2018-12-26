@@ -7,7 +7,7 @@ from aiolambda.db import _check_table_exists
 from aiolambda.errors import ObjectAlreadyExists, ObjectNotFound
 from aiolambda.functools import Maybe
 from toolz import curry
-from typing import Callable
+from typing import Callable, Optional
 
 from auth.config import ADMIN_USER, ADMIN_PASSWORD
 from auth.user import User
@@ -44,9 +44,14 @@ async def init_db(conn: asyncpg.connect) -> None:
 
 
 @curry
-async def _operate_user(operation: Callable, request: Request) -> Maybe[User]:
+async def _operate_user(operation: Callable,
+                        request: Request,
+                        username: Optional[str] = None) -> Maybe[User]:
     pool = request.app['pool']
-    user_request = User(**(await request.json()))
+    if username:
+        user_request = User(username=username, password='undefined')
+    else:
+        user_request = User(**(await request.json()))
 
     async with pool.acquire() as connection:
         maybe_user = await operation(connection, user_request)

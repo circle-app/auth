@@ -75,6 +75,17 @@ async def test_user_add_body_validation(cli):
     assert resp.status == 400
 
 
+async def test_get_user(cli):
+    token = await get_token(cli)
+    auth_header = {'Authorization': f'Bearer {token}'}
+    user = {'username': 'admin', 'password': 'admin', 'scope': 'admin'}
+    resp = await cli.get(f'{BASE_URL}/user/{user["username"]}', headers=auth_header)
+    assert resp.status == 200
+    response_user = await resp.json()
+    assert response_user.keys() == user.keys()
+    assert response_user['username'] == user['username']
+
+
 async def test_ping(cli):
     resp = await cli.get(f'{BASE_URL}/ping')
     assert resp.status == 200

@@ -71,92 +71,92 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '409':
           $ref: '#/components/responses/UserAlreadyExists'
-#  '/user/{username}':
-#    get:
-#      security:
-#      - oauth2: [admin]
-#      tags:
-#        - user
-#      summary: Get user by user name
-#      description: ''
-#      operationId: "auth.handlers.get_user_handler"
-#      parameters:
-#        - name: username
-#          in: path
-#          description: 'The name that needs to be fetched.'
-#          required: true
-#          schema:
-#            type: string
-#            example: admin
-#      responses:
-#        '200':
-#          description: successful operation
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/User'
-#        '400':
-#          description: Invalid username supplied
-#        '401':
-#          $ref: '#/components/responses/UnauthorizedError'
-#        '404':
-#          description: User not found
-#    put:
-#      security:
-#      - oauth2: [admin]
-#      tags:
-#        - user
-#      summary: Updated user
-#      description: ''
-#      operationId: "auth.handlers.update_user_handler"
-#      parameters:
-#        - name: username
-#          in: path
-#          description: name that need to be updated
-#          required: true
-#          schema:
-#            type: string
-#      requestBody:
-#        content:
-#          application/json:
-#            schema:
-#              $ref: '#/components/schemas/User'
-#        description: Updated user object
-#        required: true
-#      responses:
-#        '204':
-#          description: "successful operation"
-#        '400':
-#          description: Invalid user supplied
-#        '401':
-#          $ref: '#/components/responses/UnauthorizedError'
-#        '404':
-#          description: User not found
-#    delete:
-#      security:
-#      - oauth2: [admin]
-#      tags:
-#        - user
-#      summary: Delete user
-#      description: ''
-#      operationId: "auth.handlers.delete_user_handler"
-#      parameters:
-#        - name: username
-#          in: path
-#          description: The name that needs to be deleted
-#          required: true
-#          schema:
-#            type: string
-#      responses:
-#        '204':
-#          description: "successful operation"
-#        '400':
-#          description: Invalid username supplied
-#        '401':
-#          $ref: '#/components/responses/UnauthorizedError'
-#        '404':
-#          description: User not found
-#
+  '/user/{username}':
+    get:
+      security:
+      - oauth2: [admin]
+      tags:
+        - user
+      summary: Get user by user name
+      description: ''
+      operationId: "auth.handlers.get_user_handler"
+      parameters:
+        - name: username
+          in: path
+          description: 'The name that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            example: admin
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+    put:
+      security:
+      - oauth2: [admin]
+      tags:
+        - user
+      summary: Updated user
+      description: ''
+      operationId: "auth.handlers.update_user_handler"
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+      responses:
+        '204':
+          description: "successful operation"
+        '400':
+          description: Invalid user supplied
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+    delete:
+      security:
+      - oauth2: [admin]
+      tags:
+        - user
+      summary: Delete user
+      description: ''
+      operationId: "auth.handlers.delete_user_handler"
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: "successful operation"
+        '400':
+          description: Invalid username supplied
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: User not found
+
 #  /password:
 #    post:
 #      security:
