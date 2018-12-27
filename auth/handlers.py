@@ -12,7 +12,7 @@ from auth.verify import check_password, verify_username
 
 async def auth_handler(*_null, **extra_args) -> Response:
     return await compose(
-        check_password,
+        check_password(extra_args['token_info']['username'], extra_args['token_info']['password']),
         logger.debug,
         generate_token,
         logger.debug,

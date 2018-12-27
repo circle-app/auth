@@ -12,7 +12,7 @@ servers:
   - url: "/v1"
 tags:
 - name: auth
-  description: "Get a JWT token."
+  description: "Get a JWT token"
 - name: password
   description: "Change password"
 - name: user
@@ -22,16 +22,13 @@ tags:
 paths:
   /auth:
     post:
+      security:
+        - basic: []
       tags:
       - auth
-      summary: "Get a JWT token for user"
+      summary: "Get a JWT token"
       description: ""
       operationId: "auth.handlers.auth_handler"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
       responses:
         '201':
           description: successful operation
@@ -79,7 +76,7 @@ paths:
       - oauth2: [admin]
       tags:
         - user
-      summary: Get user by user name
+      summary: Get user
       description: ''
       operationId: "auth.handlers.get_user_handler"
       parameters:
@@ -110,7 +107,7 @@ paths:
       - oauth2: [admin]
       tags:
         - user
-      summary: Updated user
+      summary: Update user
       description: ''
       operationId: "auth.handlers.update_user_handler"
       parameters:
@@ -219,10 +216,15 @@ components:
       x-tokenInfoFunc: aiolambda.security.decode_token
       x-scopeValidateFunc: aiolambda.security.validate_scope
       flows:
-        implicit:
+        clientCredentials:
+          tokenUrl: "/v1/auth"
           scopes:
             admin: Admin role
             user: Application user
+    basic:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: auth.security.fake_basic_auth
   responses:
     UnauthorizedError:
       description: Access token is missing or invalid

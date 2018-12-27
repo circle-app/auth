@@ -20,6 +20,10 @@ def generate_token(user: User) -> Maybe[dict]:
         "scope": str(user.scope),
     }
     try:
-        return jwt.encode(payload, JWT_PRIVATE_KEY, algorithm=JWT_ALGORITHM)
+        token = jwt.encode(payload, JWT_PRIVATE_KEY, algorithm=JWT_ALGORITHM)
     except Exception:
         return JWTEncodeError()
+    return {"access_token": token,
+            "token_type": "bearer",
+            "expires_in": int(timestamp + JWT_LIFETIME_SECONDS),
+            "scope": str(user.scope)}

@@ -1,3 +1,4 @@
+import aiohttp
 import pytest
 
 from aiolambda.app import get_app
@@ -7,6 +8,7 @@ from auth.mq import init_mq
 
 
 BASE_URL = "/v1"
+AUTH = aiohttp.BasicAuth(login='admin', password='admin')
 
 
 @pytest.fixture
@@ -16,27 +18,29 @@ def cli(loop, aiohttp_client):
 
 
 async def get_token(cli) -> str:
-    auth_resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'admin', 'password': 'admin'})
-    token = str(await auth_resp.json())
+    auth_resp = await cli.post(f'{BASE_URL}/auth', auth=AUTH)
+    token = (await auth_resp.json())['access_token']
     return token
 
 
 async def test_auth(cli):
-    resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'admin', 'password': 'admin'})
+    resp = await cli.post(f'{BASE_URL}/auth', auth=AUTH)
     assert resp.status == 201
     token_start = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJhaW9sYW1iZGEiLC'
-    token = str(await resp.json())
+    token = (await resp.json())['access_token']
     assert token.startswith(f'{token_start}')
 
 
 async def test_auth_incorret_user(cli):
-    resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'foo', 'password': 'foo'})
+    resp = await cli.post(f'{BASE_URL}/auth',
+                          auth=aiohttp.BasicAuth(login='foo', password='false'))
     assert resp.status == 404
     assert await resp.json() == 'Object not found'
 
 
 async def test_auth_incorret_password(cli):
-    resp = await cli.post(f'{BASE_URL}/auth', json={'username': 'admin', 'password': 'foo'})
+    resp = await cli.post(f'{BASE_URL}/auth',
+                          auth=aiohttp.BasicAuth(login='admin', password='false'))
     assert resp.status == 422
     assert await resp.json() == 'Invalid credentials'
 
@@ -61,8 +65,8 @@ async def test_user_add_exist_user(cli):
 
 async def test_user_add_permission_deny(cli):
     auth_resp = await cli.post(f'{BASE_URL}/auth',
-                               json={'username': 'test2', 'password': 'test1234'})
-    token = str(await auth_resp.json())
+                               auth=aiohttp.BasicAuth(login='test2', password='test1234'))
+    token = (await auth_resp.json())['access_token']
     auth_header = {'Authorization': f'Bearer {token}'}
     resp = await cli.post(f'{BASE_URL}/user',
                           headers=auth_header)
