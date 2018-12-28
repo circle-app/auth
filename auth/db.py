@@ -1,13 +1,11 @@
 import asyncpg
 import passlib.hash
 
-from aiohttp.web import Request
 from aiolambda import logger
 from aiolambda.db import _check_table_exists
 from aiolambda.errors import ObjectAlreadyExists, ObjectNotFound
-from aiolambda.functools import Maybe
-from toolz import curry
-from typing import Callable, Optional
+from aiolambda.functools import bind
+from aiolambda.typing import Maybe
 
 from auth.config import ADMIN_USER, ADMIN_PASSWORD
 from auth.user import User
@@ -15,89 +13,71 @@ from auth.user import User
 USERS_TABLE_NAME = 'users'
 
 
-async def _create_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
-    try:
-        await conn.execute(f'''
-            INSERT INTO {USERS_TABLE_NAME}(username, password, scope) VALUES($1, $2, $3)
-        ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password), user.scope)
-    except asyncpg.exceptions.UniqueViolationError:
-        return ObjectAlreadyExists()
+@bind
+async def create_user(pool: asyncpg.pool, user: User) -> Maybe[User]:
+    async with pool.acquire() as conn:
+        try:
+            await conn.execute(f'''
+                INSERT INTO {USERS_TABLE_NAME}(username, password, scope) VALUES($1, $2, $3)
+            ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password), user.scope)
+        except asyncpg.exceptions.UniqueViolationError:
+            return ObjectAlreadyExists()
     return user
 
 
-async def init_db(conn: asyncpg.connect) -> None:
-    if await _check_table_exists(conn, USERS_TABLE_NAME):
+async def init_db(pool: asyncpg.pool) -> None:
+    if await _check_table_exists(pool, USERS_TABLE_NAME):
         logger.info('Already initializated.')
         return
 
     logger.info(f'Create table: {USERS_TABLE_NAME}')
-    await conn.execute(f'''
-        CREATE TABLE {USERS_TABLE_NAME}(
-            username text PRIMARY KEY,
-            password text,
-            scope text
-        )
-    ''')
+    async with pool.acquire() as conn:
+        await conn.execute(f'''
+            CREATE TABLE {USERS_TABLE_NAME}(
+                username text PRIMARY KEY,
+                password text,
+                scope text
+            )
+        ''')
 
     logger.info(f'Create admin user')
-    await _create_user(conn, User(ADMIN_USER, ADMIN_PASSWORD, 'admin'))
+    await create_user(pool, User(ADMIN_USER, ADMIN_PASSWORD, 'admin'))
 
 
-@curry
-async def _operate_user(operation: Callable,
-                        request: Maybe[Request],
-                        username: Optional[str] = None) -> Maybe[User]:
-    if isinstance(request, Exception):
-        return request
-    pool = request.app['pool']
-    if username:
-        user_request = User(username=username, password='undefined')
-    else:
-        user_request = User(**(await request.json()))
-
-    async with pool.acquire() as connection:
-        maybe_user = await operation(connection, user_request)
-    return maybe_user
-
-
-@_operate_user
-async def create_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
-    return await _create_user(conn, user)
-
-
-@_operate_user
-async def update_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
-    await conn.execute(f'''
-        UPDATE {USERS_TABLE_NAME} SET password = $2, scope = $3 WHERE username = $1
-    ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password), user.scope)
+@bind
+async def update_user(pool: asyncpg.pool, user: User) -> Maybe[User]:
+    async with pool.acquire() as conn:
+        await conn.execute(f'''
+            UPDATE {USERS_TABLE_NAME} SET password = $2, scope = $3 WHERE username = $1
+        ''', user.username, passlib.hash.pbkdf2_sha256.hash(user.password), user.scope)
     return user
 
 
-@_operate_user
-async def delete_user(conn: asyncpg.connect, user: User) -> Maybe[User]:
-    res = await conn.execute(f'''
-        DELETE FROM {USERS_TABLE_NAME} WHERE username = $1
-    ''', user.username)
+@bind
+async def delete_user(pool: asyncpg.pool, username: str) -> Maybe[str]:
+    async with pool.acquire() as conn:
+        res = await conn.execute(f'''
+            DELETE FROM {USERS_TABLE_NAME} WHERE username = $1
+        ''', username)
     if res == 'DELETE 0':
         return ObjectNotFound()
-    return user
+    return username
 
 
-@_operate_user
-async def get_user(conn: asyncpg.connection, user: User) -> Maybe[User]:
-    row = await conn.fetchrow(
-        f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', user.username)
+@bind
+async def get_user(pool: asyncpg.pool, username: str) -> Maybe[User]:
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            f'SELECT * FROM {USERS_TABLE_NAME} WHERE username = $1', username)
 
     if not row:
         return ObjectNotFound()
     return User(**dict(row))
 
 
-async def update_password(request: Maybe[Request]) -> Maybe[User]:
-    pool = request.app['pool']
-    username = request['user']
-    password = await request.json()
-
+@bind
+async def update_password(pool: asyncpg.pool,
+                          username: str, password: str) -> Maybe[str]:
     async with pool.acquire() as connection:
         res = await connection.execute(f'''
             UPDATE {USERS_TABLE_NAME} SET password = $2 WHERE username = $1

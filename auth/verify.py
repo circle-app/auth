@@ -1,17 +1,17 @@
+import asyncpg
 import passlib
 
-from aiohttp.web import Request
+from aiolambda.functools import bind
 from aiolambda.typing import Maybe
-from toolz import curry
 
 from auth.db import get_user
 from auth.errors import InvalidCredentials, IdCheckError
 from auth.user import User
 
 
-@curry
-async def check_password(username: str, password: str, request: Request) -> Maybe[User]:
-    user_data = await get_user(request, username)
+@bind
+async def check_password(db_pool: asyncpg.pool, username: str, password: str) -> Maybe[User]:
+    user_data = await get_user(db_pool, username)
     if isinstance(user_data, Exception):
         return user_data
 
@@ -23,8 +23,8 @@ async def check_password(username: str, password: str, request: Request) -> Mayb
     return user_data
 
 
-async def verify_username(request: Request, username: str) -> Maybe[Request]:
-    user_request = User(**(await request.json()))
+@bind
+async def verify_username(user_request: User, username: str) -> Maybe[User]:
     if user_request.username != username:
         return IdCheckError()
-    return request
+    return user_request
