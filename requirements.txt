@@ -1,7 +1,7 @@
 aiohttp==3.5.1
 aiohttp-swagger==1.0.5
 aiohttp-jinja2==1.1.0
-aiolambda==0.2.20
+aiolambda==0.2.21
 aio-pika==4.9.1
 ujson==1.35
 python-jose[cryptography]==3.0.1
